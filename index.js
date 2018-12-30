@@ -75,13 +75,19 @@ function startXmysql(sqlConfig) {
   /* Auth setup */
   app.post('/token', function(req,res) {
     if (req.body) {
-      let payload = moreApis.authCheck(req.body);
-      if (payload) {
-        let token = jsonwebtoken.sign(payload, 'shhhhhhared-secret');
-        res.status(200).json({jwt: token});
-      } else {
-        res.status(401).send('Invalid credentials.');
-      }
+      moreApis.authCheck(req.body)
+      .then(function(payload) {
+        if (payload) {
+          console.log(payload);
+          let token = jsonwebtoken.sign(payload, 'shhhhhhared-secret');
+          res.status(200).json({jwt: token});
+        } else {
+          res.status(401).json({error: 'Invalid credentials.'});
+        }
+      },
+      function(err) {
+        res.status(500).json(err);
+      })
     } else {
       res.status(400).send('Required username and password fields.');
     }
