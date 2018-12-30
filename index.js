@@ -27,17 +27,6 @@ function startXmysql(sqlConfig) {
     extended: true
   }));
 
-  app.use(jwt({ 
-    secret: 'shhhhhhared-secret',
-    credentialsRequired: true
-  }).unless({path: ['/token']}));
-
-  app.use(function (err, req, res, next) {
-    if (err.name === 'UnauthorizedError') {
-      res.status(401).send('invalid token...');
-    }
-  });
-
   /**************** END : setup express ****************/
 
 
@@ -73,25 +62,38 @@ function startXmysql(sqlConfig) {
 
 
   /* Auth setup */
-  app.post('/token', function(req,res) {
-    if (req.body) {
-      moreApis.authCheck(req.body)
-      .then(function(payload) {
-        if (payload) {
-          console.log(payload);
-          let token = jsonwebtoken.sign(payload, 'shhhhhhared-secret');
-          res.status(200).json({jwt: token});
-        } else {
-          res.status(401).json({error: 'Invalid credentials.'});
-        }
-      },
-      function(err) {
-        res.status(500).json(err);
-      })
-    } else {
-      res.status(400).send('Required username and password fields.');
-    }
-  });
+  if (process.env.JWT_SECRET) {
+
+    app.use(jwt({ 
+      secret: 'shhhhhhared-secret',
+      credentialsRequired: true
+    }).unless({path: ['/token']}));
+
+    app.use(function (err, req, res, next) {
+      if (err.name === 'UnauthorizedError') {
+        res.status(401).send('invalid token...');
+      }
+    });
+
+    app.post('/token', function(req,res) {
+      if (req.body) {
+        moreApis.authCheck(req.body)
+        .then(function(payload) {
+          if (payload) {
+            let token = jsonwebtoken.sign(payload, 'shhhhhhared-secret');
+            res.status(200).json({jwt: token});
+          } else {
+            res.status(401).json({error: 'Invalid credentials.'});
+          }
+        },
+        function(err) {
+          res.status(500).json(err);
+        })
+      } else {
+        res.status(400).send('Required username and password fields.');
+      }
+    });
+  }
 }
 
 function start(sqlConfig) {
