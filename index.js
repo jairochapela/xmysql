@@ -13,7 +13,8 @@ const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 const { version } = require('./package.json');
 
-
+const jwt = require('express-jwt');
+const jsonwebtoken = require('jsonwebtoken');
 
 function startXmysql(sqlConfig) {
   /**************** START : setup express ****************/
@@ -25,6 +26,18 @@ function startXmysql(sqlConfig) {
   app.use(bodyParser.urlencoded({
     extended: true
   }));
+
+  app.use(jwt({ 
+    secret: 'shhhhhhared-secret',
+    credentialsRequired: true
+  }).unless({path: ['/token']}));
+
+  app.use(function (err, req, res, next) {
+    if (err.name === 'UnauthorizedError') {
+      res.status(401).send('invalid token...');
+    }
+  });
+
   /**************** END : setup express ****************/
 
 
@@ -58,6 +71,21 @@ function startXmysql(sqlConfig) {
   });
   /**************** END : setup Xapi ****************/
 
+
+  /* Auth setup */
+  app.post('/token', function(req,res) {
+    if (req.body) {
+      let payload = moreApis.authCheck(req.body);
+      if (payload) {
+        let token = jsonwebtoken.sign(payload, 'shhhhhhared-secret');
+        res.status(200).json({jwt: token});
+      } else {
+        res.status(401).send('Invalid credentials.');
+      }
+    } else {
+      res.status(400).send('Required username and password fields.');
+    }
+  });
 }
 
 function start(sqlConfig) {
