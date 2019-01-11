@@ -13,7 +13,8 @@ const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 const { version } = require('./package.json');
 
-
+const jwt = require('express-jwt');
+const jsonwebtoken = require('jsonwebtoken');
 
 function startXmysql(sqlConfig) {
   /**************** START : setup express ****************/
@@ -25,6 +26,7 @@ function startXmysql(sqlConfig) {
   app.use(bodyParser.urlencoded({
     extended: true
   }));
+
   /**************** END : setup express ****************/
 
 
@@ -58,6 +60,43 @@ function startXmysql(sqlConfig) {
   });
   /**************** END : setup Xapi ****************/
 
+
+  /* Auth setup */
+  if (process.env.JWT_SECRET) {
+
+    app.use(jwt({ 
+      secret: process.env.JWT_SECRET,
+      credentialsRequired: true
+    }).unless({path: ['/token']}));
+
+    app.use(function (err, req, res, next) {
+      if (req.headers['x-master-key'] === process.env.MASTER_KEY) {
+        next();
+      }
+      else if (err.name === 'UnauthorizedError') {
+        res.status(401).send('invalid token...');
+      }
+    });
+
+    app.post('/token', function(req,res) {
+      if (req.body) {
+        moreApis.authCheck(req.body)
+        .then(function(payload) {
+          if (payload) {
+            let token = jsonwebtoken.sign(payload, process.env.JWT_SECRET);
+            res.status(200).json({jwt: token});
+          } else {
+            res.status(401).json({error: 'Invalid credentials.'});
+          }
+        },
+        function(err) {
+          res.status(500).json(err);
+        })
+      } else {
+        res.status(400).send('Required username and password fields.');
+      }
+    });
+  }
 }
 
 function start(sqlConfig) {
