@@ -65,7 +65,7 @@ function startXmysql(sqlConfig) {
   if (process.env.JWT_SECRET) {
 
     app.use(jwt({ 
-      secret: 'shhhhhhared-secret',
+      secret: process.env.JWT_SECRET,
       credentialsRequired: true
     }).unless({path: ['/token']}));
 
@@ -80,7 +80,7 @@ function startXmysql(sqlConfig) {
         moreApis.authCheck(req.body)
         .then(function(payload) {
           if (payload) {
-            let token = jsonwebtoken.sign(payload, 'shhhhhhared-secret');
+            let token = jsonwebtoken.sign(payload, process.env.JWT_SECRET);
             res.status(200).json({jwt: token});
           } else {
             res.status(401).json({error: 'Invalid credentials.'});
