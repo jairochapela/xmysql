@@ -70,7 +70,10 @@ function startXmysql(sqlConfig) {
     }).unless({path: ['/token']}));
 
     app.use(function (err, req, res, next) {
-      if (err.name === 'UnauthorizedError') {
+      if (req.headers['x-master-key'] === process.env.MASTER_KEY) {
+        next();
+      }
+      else if (err.name === 'UnauthorizedError') {
         res.status(401).send('invalid token...');
       }
     });
