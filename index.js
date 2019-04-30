@@ -79,7 +79,28 @@ function startXmysql(sqlConfig) {
     });
 
     app.post('/token', function(req,res) {
-      if (req.body) {
+      if (req.headers['authorization']) {
+        let authHeader = req.headers['authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          authHeader = authHeader.split(' ');
+          if (authHeader.length == 2) {
+            let token = authHeader[1];
+            try {
+            let payload = jsonwebtoken.verify(token, process.env.JWT_SECRET);
+            console.log(payload);
+            delete payload.iat;
+            token = jsonwebtoken.sign(payload, process.env.JWT_SECRET);
+            res.status(200).json({jwt: token});      
+            } catch (err) {
+              res.status(401).json({error: err.message});    
+            }
+          } else {
+            res.status(401).json({error: 'Invalid credentials.'});  
+          }  
+        } else {
+          res.status(401).json({error: 'Invalid credentials.'});
+        } 
+      } else if (req.body) {
         moreApis.authCheck(req.body)
         .then(function(payload) {
           if (payload) {

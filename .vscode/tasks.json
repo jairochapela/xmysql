@@ -1,0 +1,51 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "xmysql",
+            "type": "shell",
+            "command": "node",
+            "args": ["index.js", "-u", "root", "-p", "aaa", "-d", "wr"],
+            "options": {
+                "env": {
+                    "TZ": "GMT",
+                    "DATABASE_HOST": "localhost",
+                    // "DATABASE_USER": "root",
+                    // "DATABASE_PASSWORD": "aaa",
+                    // "DATABASE_NAME": "wr2",
+                    "MASTER_KEY": "ZpxqxdJEJ5xFalyA58vDgQ5G",
+                    "USERS_TABLE": "usuarios",
+                    "UID_FIELD": "id",
+                    // "USERNAME_FIELD": "id",
+                    // "PASSWORD_FIELD": "password",
+                    // "JWT_SECRET": "CtsUFqS0jMTjokM2hYMK04lT",
+                    // "MD5_PASSWORDS":  "n"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "xmysql auth",
+            "type": "shell",
+            "command": "node",
+            "args": ["index.js", "-u", "root", "-p", "aaa", "-d", "wr"],
+            "options": {
+                "env": {
+                    "TZ": "GMT",
+                    "DATABASE_HOST": "localhost",
+                    // "DATABASE_USER": "root",
+                    // "DATABASE_PASSWORD": "aaa",
+                    // "DATABASE_NAME": "wr2",
+                    "MASTER_KEY": "ZpxqxdJEJ5xFalyA58vDgQ5G",
+                    "USERS_TABLE": "usuarios",
+                    "UID_FIELD": "id",
+                    "USERNAME_FIELD": "id",
+                    "PASSWORD_FIELD": "password",
+                    "JWT_SECRET": "CtsUFqS0jMTjokM2hYMK04lT",
+                    "MD5_PASSWORDS":  "n"
+                }
+            },
+            "problemMatcher": []
+        }
+    ]
+}
